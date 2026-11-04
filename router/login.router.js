@@ -1,7 +1,7 @@
 const express=require("express");
-const Data=require("../controller/test.controller");
+const login=require("../controller/login.controller");
 const router=express.Router();
 
-router.get("/data",Data);
+router.post("/login",login);
 
 module.exports=router;
