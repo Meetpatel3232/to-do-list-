@@ -4,37 +4,46 @@ const jwt=require("jsonwebtoken");
 require("dotenv").config();
 const bcrypt=require("bcrypt");
 const login = async (req, res) => {
-  try {
+ 
+try {
     const { username, email, password } = req.body;
 
     console.log("Registration request received:", { username, email });
 
-    const user = await User.findOne({ email });
+    const existingUser = await User.findOne({ email });
 
-    if (user) {
+    if (existingUser) {
         return res.status(409).json({
             success: false,
             message: "User already exists"
         });
     }
 
-    const hashedpassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await bcrypt.hash(password, 10);
 
-    console.log("Password hashed successfully");
-
-    await User.create({
+   
+    const user = await User.create({
         username,
         email,
-        password: hashedpassword
+        password: hashedPassword
     });
 
+ 
     const token = jwt.sign(
-        { username, email },
-        process.env.Key
+        {
+            id: user._id,
+            username: user.username,
+            email: user.email
+        },
+        process.env.Key,
+        { expiresIn: "1d" }
     );
 
     res.cookie("token", token, {
-        httpOnly: true
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        maxAge: 24 * 60 * 60 * 1000
     });
 
     return res.status(201).json({
@@ -50,6 +59,7 @@ const login = async (req, res) => {
         message: "Internal server error"
     });
 }
+
     
 };
 

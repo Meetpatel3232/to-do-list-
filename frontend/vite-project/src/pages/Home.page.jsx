@@ -1,10 +1,12 @@
+import ListView from "../fragments/listview";
+import AddList from "../fragments/addList";
 const home=()=>{
     return(
+ 
 
 <>
-
-<h1 className="bg-emerald-100"></h1>
-
+<AddList/>
+<ListView/>
 </>
 
     )

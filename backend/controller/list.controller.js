@@ -1,13 +1,24 @@
 
-const List=require("../model/list.model");
+const List = require("../model/list.model");
+
 const addList = async (req, res) => {
     try {
-        const { userid, text, completed } = req.body;
+        console.log("Authenticated user:", req.user);
+
+        const { text } = req.body;
+        const userid = req.user?.id;
+
+        if (!userid) {
+            return res.status(401).json({
+                success: false,
+                message: "User ID missing from token"
+            });
+        }
 
         const list = await List.create({
-             userid,
+            userid,
             text,
-            completed
+            completed: false
         });
 
         return res.status(201).json({
@@ -17,7 +28,31 @@ const addList = async (req, res) => {
         });
 
     } catch (error) {
-        console.error(error);
+        console.error("ADD LIST ERROR:", error);
+
+        return res.status(500).json({
+            success: false,
+            message: error.message
+        });
+    }
+};
+
+
+const getList = async (req, res) => {
+    try {
+        const userid = req.user.id;
+
+        const list = await List.find({ userid })
+            .sort({ createdAt: -1 });
+
+        return res.status(200).json({
+            success: true,
+            message: "Tasks fetched successfully",
+            data: list
+        });
+
+    } catch (error) {
+        console.error("Get tasks error:", error);
 
         return res.status(500).json({
             success: false,
@@ -26,32 +61,7 @@ const addList = async (req, res) => {
     }
 };
 
-module.exports = { addList };
-
-const getList=async(req,res)=>{
-const {userid}=req.body;
-   try {
-    const list=await List.find({
-      userid
-    })   
-
-    return res.status(201).json({
-        success:true,
-        message:"fetch the list",
-        data:list
-    })
- 
-
-   } catch (error) {
-    return res.status(500).json({
-            success: false,
-            message: "Internal server error"
-        });
-   }
-
-
-
-}
-
-
-module.exports={getList,addList};
+module.exports = {
+    getList,
+    addList
+};

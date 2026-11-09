@@ -1,7 +1,8 @@
 const express=require("express");
 const {getList,addList}=require("../controller/list.controller");
 const router=express.Router();
-router.get("/getList",getList);
-router.post("/addList",addList);
+const verifyToken=require("../middleware/verifyToken");
+router.get("/getList",verifyToken,getList);
+router.post("/addList",verifyToken,addList);
 
 module.exports=router;
